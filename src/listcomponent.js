@@ -6,9 +6,6 @@ import { useProfile } from '../save/savecomponent';
 import { saveProfile } from '../save/savecomponent';
 
 
-// in progress but havent stored data to phone memory yet
-
-
 export default function listpage() {
   const [text, setText] = useState('');
   const [tasks, setTasks] = useState([]);
@@ -44,6 +41,7 @@ export default function listpage() {
         onPress={() => {
           setTasks([...tasks, text]);
           setText(''); 
+          console.log("task " + text + " added");
         }}
         style={styles.button}
       >
@@ -60,6 +58,7 @@ export default function listpage() {
               onPress={() => {
                 const newTasks = tasks.filter((_, i) => i !== index);
                 setTasks(newTasks);
+                console.log("task " + task + " deleted");
               }}
               style={styles.button}
             >
