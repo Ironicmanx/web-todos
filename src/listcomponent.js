@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 import { ScrollView } from 'react-native';
 import { useProfile } from '../save/savecomponent';
 import { saveProfile } from '../save/savecomponent';
 
-
 export default function listpage() {
   const [text, setText] = useState('');
   const [tasks, setTasks] = useState([]);
   const { getProfile, saveProfile } = useProfile();
-  
 
-  useEffect(() => {
+  const toggleTaskDone = (index) => { 
+    const newTasks = tasks.map((task, i) => {
+      if (i === index) {
+        return { ...task, done: !task.done };
+      }
+      return task;
+    });
+    setTasks(newTasks);
+  };
+
+  useEffect(() => { // Load tasks from storage
     const loadTasks = async () => {
       const loadedTasks = await getProfile();
       setTasks(loadedTasks);
@@ -20,11 +28,9 @@ export default function listpage() {
     loadTasks();
   }, []);
 
-
-  useEffect(() => {
+  useEffect(() => { // Save tasks to storage
     saveProfile(tasks);
   }, [tasks]);
-
 
   return (
     <View style={styles.container}>
@@ -39,7 +45,8 @@ export default function listpage() {
         icon="plus"
         mode="contained"
         onPress={() => {
-          setTasks([...tasks, text]);
+          if (!text) return
+          setTasks([...tasks, { text, done: false }]);
           setText(''); 
           console.log("task " + text + " added");
         }}
@@ -51,14 +58,18 @@ export default function listpage() {
         <Text style={styles.Text}>Tasks</Text>
         {tasks.map((task, index) => (
           <View key={index} style={styles.taskContainer}>
-            <Text style={styles.taskText}>{task}</Text>
+            <TouchableOpacity onPress={() => toggleTaskDone(index)} style={{ flex: 1 }}> 
+              <Text style={[styles.taskText, task.done && styles.taskTextDone]}>
+                {task.text}
+              </Text>
+            </TouchableOpacity>
             <Button
               icon="delete"
               mode="contained"
               onPress={() => {
                 const newTasks = tasks.filter((_, i) => i !== index);
                 setTasks(newTasks);
-                console.log("task " + task + " deleted");
+                console.log("task " + task.text + " deleted");
               }}
               style={styles.button}
             >
@@ -102,5 +113,9 @@ const styles = StyleSheet.create({
   },
   taskText: {
     flex: 1,
+  },
+  taskTextDone: {
+    textDecorationLine: 'line-through',
+    color: 'gray',
   },
 });
